@@ -1,1 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Webcam en direct – Avied</title>
+  <style>
+    body {
+      background-color: rgba(233, 239, 220, 0.8);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    header {
+      background: linear-gradient(to right, #1a1a1a, #003366);
+      color: white;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    #main-video {
+      margin-top: 30px;
+      width: 90%;
+      max-width: 800px;
+      height: auto;
+      border: 3px solid #ffe000;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .miniatures {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 40px;
+      gap: 20px;
+    }
+
+    .miniature {
+      width: 160px;
+      height: 100px;
+      background-color: #ccc;
+      border: 2px solid #003366;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #333;
+    }
+
+    footer {
+      margin-top: 50px;
+      padding: 20px;
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Protection par code d'accès
+    const codeSession = prompt("Entrez le code d'accès pour accéder à la page Webcam :");
+
+    // Code d'accès à définir
+    const codeValide = "ABC123"; // À personnaliser
+
+    if (codeSession !== codeValide) {
+      alert("Accès refusé.");
+      window.location.href = "https://avied.netlify.app"; // Rediriger si le code est incorrect
+    }
+
+    // Chargement dynamique des miniatures (Exemple avec une API fictive)
+    fetch(`videos_recentes.php?code=${codeSession}`)
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("miniatureContainer");
+        container.innerHTML = ""; // Vide le message par défaut
+
+        if (data.length === 0) {
+          container.innerHTML = "<div class='miniature'>Aucune vidéo pour ce code.</div>";
+        } else {
+          data.forEach(video => {
+            const div = document.createElement("div");
+            div.className = "miniature";
+            div.innerHTML = `
+              <video src="${video.video_url}" controls width="150"></video>
+              <div>${video.username}</div>
+            `;
+            container.appendChild(div);
+          });
+        }
+      })
+      .catch(err => {
+        console.error("Erreur lors du chargement des vidéos : ", err);
+      });
+  </script>
+
+  <header>
+    <h1>Webcam – Salle de participation</h1>
+  </header>
+
+  <!-- Webcam principale -->
+  <video id="main-video" autoplay muted></video>
+
+  <!-- Miniatures des autres utilisateurs -->
+  <div class="miniatures" id="miniatureContainer">
+    <!-- Les vidéos des autres participants apparaîtront ici dynamiquement -->
+    <div class="miniature">En attente d'autres participants...</div>
+  </div>
+
+  <footer>
+    © 2025 Avied Platform. Préparé pour l’intégration dynamique via InfinityFree.
+  </footer>
+
+  <script>
+    // Démarrage de la webcam locale
+    const mainVideo = document.getElementById('main-video');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        mainVideo.srcObject = stream;
+      })
+      .catch(err => {
+        alert("Erreur de la webcam : " + err.message);
+      });
+
+    // Espace prévu pour les miniatures dynamiques
+    // Exemple futur : récupération via AJAX ou WebSocket
+    // fetch("requetes/participants.php?code=XYZ") ...
+  </script>
+
+</body>
+</html>
 
