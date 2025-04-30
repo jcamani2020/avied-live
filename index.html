@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Avied Video Web</title>
+  <style>
+    body {
+      background-color: rgba(233, 239, 220, 0.8);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    header {
+      background: linear-gradient(to right, #1a1a1a, #003366);
+      padding: 20px;
+      color: white;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .container {
+      margin-top: 50px;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: linear-gradient(to right, #1a1a1a, #003366);
+      color: white;
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+
+    .btn:hover {
+      background: linear-gradient(to right, #003366, #1a1a1a);
+      transform: scale(1.05);
+    }
+
+    video {
+      margin-top: 30px;
+      width: 90%;
+      max-width: 600px;
+      border: 3px solid #ffe000;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding: 20px;
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Bienvenue sur Avied Video Web</h1>
+  </header>
+
+  <div class="container">
+    <button class="btn" id="webcamBtn">🎥 Lancer Webcam</button>
+    <button class="btn" id="liveBtn">📺 Lancer Vidéo Live</button>
+  </div>
+
+  <video id="webcamVideo" autoplay muted style="display:none;"></video>
+  <video id="liveVideo" controls style="display:none;"></video>
+
+  <footer>
+    &copy; 2025 Avied Platform – Tous droits réservés.
+  </footer>
+
+  <script>
+    const webcamBtn = document.getElementById('webcamBtn');
+    const liveBtn = document.getElementById('liveBtn');
+    const webcamVideo = document.getElementById('webcamVideo');
+    const liveVideo = document.getElementById('liveVideo');
+
+    webcamBtn.addEventListener('click', () => {
+      liveVideo.style.display = 'none';
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          webcamVideo.srcObject = stream;
+          webcamVideo.style.display = 'block';
+        })
+        .catch(err => {
+          alert("Erreur d'accès à la webcam : " + err.message);
+        });
+    });
+
+    liveBtn.addEventListener('click', () => {
+      webcamVideo.style.display = 'none';
+      liveVideo.src = "https://www.w3schools.com/html/mov_bbb.mp4"; // Change ici ton lien vers le flux live réel
+      liveVideo.style.display = 'block';
+      liveVideo.play();
+    });
+  </script>
+
+</body>
+</html>
