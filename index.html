@@ -49,10 +49,11 @@
       transform: scale(1.05);
     }
 
-    video {
+    iframe, video {
       margin-top: 30px;
       width: 90%;
-      max-width: 600px;
+      max-width: 900px;
+      height: 500px;
       border: 3px solid #ffe000;
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -75,10 +76,14 @@
   <div class="container">
     <button class="btn" id="webcamBtn">🎥 Lancer Webcam</button>
     <button class="btn" id="liveBtn">📺 Lancer Vidéo Live</button>
+    <!-- Bouton redirigeant vers le dashboard live -->
+    <a href="dashboard_live.html">
+      <button class="btn">🔗 Accéder au Dashboard Live</button>
+    </a>
   </div>
 
   <video id="webcamVideo" autoplay muted style="display:none;"></video>
-  <video id="liveVideo" controls style="display:none;"></video>
+  <iframe id="liveVideo" style="display:none;" allowfullscreen></iframe>
 
   <footer>
     &copy; 2025 Avied Platform – Tous droits réservés.
@@ -104,9 +109,8 @@
 
     liveBtn.addEventListener('click', () => {
       webcamVideo.style.display = 'none';
-      liveVideo.src = "https://www.w3schools.com/html/mov_bbb.mp4"; // Change ici ton lien vers le flux live réel
+      liveVideo.src = "https://www.youtube.com/embed/TON_ID_VIDEO"; // Remplace TON_ID_VIDEO par l’ID de ta vidéo YouTube Live
       liveVideo.style.display = 'block';
-      liveVideo.play();
     });
   </script>
 
