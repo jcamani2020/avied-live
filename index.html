@@ -60,6 +60,21 @@
   </style>
 </head>
 <body>
+  <script>
+  fetch("https://avied-online.great-site.net/trouve.html")
+    .then(response => response.text())
+    .then(mdpCorrect => {
+      const saisie = prompt("Page protégée - entrez le mot de passe :");
+      if (saisie !== mdpCorrect.trim()) {
+        alert("Mot de passe incorrect.");
+        window.location.href = "https://avied.netlify.app"; // page de secours
+      }
+    })
+    .catch(err => {
+      alert("Erreur de vérification de mot de passe.");
+      window.location.href = "https://avied.netlify.app";
+    });
+</script>
   <header>
     <h1>Diffusion Webcam en Direct</h1>
   </header><video id="mainWebcam" class="main-video" autoplay muted playsinline></video>
