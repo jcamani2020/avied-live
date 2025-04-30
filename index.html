@@ -1,118 +1,124 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!DOCTYPE html><html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Avied Video Web</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diffusion Webcam - Avied</title>
   <style>
     body {
-      background-color: rgba(233, 239, 220, 0.8);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, sans-serif;
+      background: rgba(233, 239, 220, 0.8);
       margin: 0;
       padding: 0;
       text-align: center;
     }
-
     header {
       background: linear-gradient(to right, #1a1a1a, #003366);
-      padding: 20px;
       color: white;
+      padding: 1rem;
     }
-
-    h1 {
-      margin: 0;
-      font-size: 28px;
+    .main-video {
+      width: 80%;
+      margin: 1rem auto;
+      border: 2px solid #003366;
+      border-radius: 10px;
     }
-
-    .container {
-      margin-top: 50px;
+    .miniatures {
       display: flex;
-      justify-content: center;
-      gap: 30px;
       flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
     }
-
-    .btn {
+    .miniature {
+      width: 120px;
+      height: 90px;
+      background: black;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .controls {
+      margin: 1rem;
+    }
+    .controls button {
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
       background: linear-gradient(to right, #1a1a1a, #003366);
       color: white;
-      padding: 15px 30px;
-      font-size: 18px;
       border: none;
-      border-radius: 12px;
+      border-radius: 5px;
       cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: transform 0.2s ease, background 0.3s ease;
     }
-
-    .btn:hover {
-      background: linear-gradient(to right, #003366, #1a1a1a);
-      transform: scale(1.05);
+    .document-section {
+      margin-top: 2rem;
     }
-
-    iframe, video {
-      margin-top: 30px;
+    iframe.document-viewer {
       width: 90%;
-      max-width: 900px;
-      height: 500px;
-      border: 3px solid #ffe000;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    footer {
-      margin-top: 50px;
-      padding: 20px;
-      font-size: 14px;
-      color: #333;
+      height: 400px;
+      border: 1px solid #003366;
+      margin-top: 1rem;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-
   <header>
-    <h1>Bienvenue sur Avied Video Web</h1>
-  </header>
+    <h1>Diffusion Webcam en Direct</h1>
+  </header><video id="mainWebcam" class="main-video" autoplay muted playsinline></video>
 
-  <div class="container">
-    <button class="btn" id="webcamBtn">🎥 Lancer Webcam</button>
-    <button class="btn" id="liveBtn">📺 Lancer Vidéo Live</button>
-    <!-- Bouton redirigeant vers le dashboard live -->
-    <a href="dashboard_live.html">
-      <button class="btn">🔗 Accéder au Dashboard Live</button>
-    </a>
-  </div>
+  <div class="controls">
+    <button onclick="startWebcam()">Démarrer Webcam</button>
+    <button onclick="stopWebcam()">Arrêter Webcam</button>
+    <button onclick="partagerDocument()">Afficher un Document</button>
+    <input type="file" id="documentUploader" accept="application/pdf,.doc,.docx,.ppt,.pptx" style="display:none" onchange="previewDocument(event)">
+  </div>  <div class="miniatures" id="miniaturesContainer">
+    <!-- Miniatures des autres utilisateurs -->
+    <div class="miniature"></div>
+    <div class="miniature"></div>
+    <div class="miniature"></div>
+  </div>  <div class="document-section">
+    <h3>Document en cours de diffusion</h3>
+    <iframe id="documentViewer" class="document-viewer" style="display:none;"></iframe>
+  </div>  <script>
+    const videoElement = document.getElementById('mainWebcam');
+    let webcamStream;
 
-  <video id="webcamVideo" autoplay muted style="display:none;"></video>
-  <iframe id="liveVideo" style="display:none;" allowfullscreen></iframe>
-
-  <footer>
-    &copy; 2025 Avied Platform – Tous droits réservés.
-  </footer>
-
-  <script>
-    const webcamBtn = document.getElementById('webcamBtn');
-    const liveBtn = document.getElementById('liveBtn');
-    const webcamVideo = document.getElementById('webcamVideo');
-    const liveVideo = document.getElementById('liveVideo');
-
-    webcamBtn.addEventListener('click', () => {
-      liveVideo.style.display = 'none';
-      navigator.mediaDevices.getUserMedia({ video: true })
+    function startWebcam() {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
         .then(stream => {
-          webcamVideo.srcObject = stream;
-          webcamVideo.style.display = 'block';
+          webcamStream = stream;
+          videoElement.srcObject = stream;
         })
-        .catch(err => {
-          alert("Erreur d'accès à la webcam : " + err.message);
-        });
-    });
+        .catch(err => alert("Erreur d'accès à la webcam : " + err.message));
+    }
 
-    liveBtn.addEventListener('click', () => {
-      webcamVideo.style.display = 'none';
-      liveVideo.src = "https://www.youtube.com/embed/TON_ID_VIDEO"; // Remplace TON_ID_VIDEO par l’ID de ta vidéo YouTube Live
-      liveVideo.style.display = 'block';
-    });
+    function stopWebcam() {
+      if (webcamStream) {
+        webcamStream.getTracks().forEach(track => track.stop());
+        videoElement.srcObject = null;
+      }
+    }
+
+    function partagerDocument() {
+      document.getElementById('documentUploader').click();
+    }
+
+    function previewDocument(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        const viewer = document.getElementById('documentViewer');
+        viewer.src = fileURL;
+        viewer.style.display = 'block';
+      }
+    }
   </script>
-
-</body>
+  <button class="btn btn-danger" id="endStreamBtn">🛑 Terminer la diffusion</button>
+  <script>
+  document.getElementById('endStreamBtn').addEventListener('click', () => {
+    if (confirm("Voulez-vous vraiment terminer la diffusion ?")) {
+      // Redirige ou appelle un script PHP pour mettre à jour la base de données
+      window.location.href = "terminer_diffusion.php"; // ou exécute une requête AJAX
+    }
+  });
+</script>
+  </body>
 </html>
