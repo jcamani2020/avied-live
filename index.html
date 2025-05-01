@@ -1,3 +1,39 @@
+<?php
+session_start();
+
+// Inclusion du fichier de configuration pour la base de données
+require_once __DIR__ . '/../../config.php';
+
+// Récupérer le code depuis l'URL
+$code = $_GET['code'] ?? '';
+
+// Vérification du code de diffusion dans la base de données
+if ($code) {
+    $sql = "SELECT * FROM diffusion_cam WHERE code_diffusion = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $code);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($row = $result->fetch_assoc()) {
+        // Code valide, récupérer les informations de diffusion
+        $valid = true;
+        $titre = $row['titre'];
+        $lien_video = $row['lien_video'];
+    } else {
+        // Code invalide
+        $valid = false;
+    }
+} else {
+    $valid = false;
+}
+
+if (!$valid) {
+    // Si le code est invalide, rediriger ou afficher une erreur
+    echo "<h1>Code de diffusion invalide ou non fourni</h1>";
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -134,25 +170,14 @@
       }
     });
 
-    // Vérification du code de diffusion
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
+    // Code PHP intégré directement dans la page (donnée depuis le serveur)
+    const lienDiffusion = "<?php echo $lien_video; ?>";
 
-    if (code) {
-      fetch("https://avied-online.great-site.net/verifie_code.php?code=" + code)
-        .then(res => res.json())
-        .then(data => {
-          if (data.valide) {
-            document.getElementById("contenu").classList.remove("hidden");
-          } else {
-            document.getElementById("erreur").innerText = "Code de diffusion invalide.";
-          }
-        })
-        .catch(err => {
-          document.getElementById("erreur").innerText = "Erreur de vérification du code.";
-        });
+    if (lienDiffusion) {
+      // On rend le contenu visible si le code est valide
+      document.getElementById("contenu").classList.remove("hidden");
     } else {
-      document.getElementById("erreur").innerText = "Aucun code de diffusion fourni.";
+      document.getElementById("erreur").innerText = "Code de diffusion invalide.";
     }
   </script>
 </body>
