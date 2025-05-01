@@ -1,105 +1,76 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Diffusion Webcam - Avied</title>
-  <style>
-    /* Ton CSS ici (identique à ton exemple) */
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diffusion en Direct - Ma Période</title>
+  <!-- Lien vers Font Awesome pour les icônes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css"> <!-- Assurez-vous de lier votre fichier CSS -->
 </head>
-<body>
-  <header>
-    <h1>Diffusion Webcam en Direct</h1>
+
+<body style="background-color: rgba(233, 239, 220, 0.8);">
+
+  <!-- Header avec logo -->
+  <header style="background: linear-gradient(to right, #1a1a1a, #003366); color: white; padding: 20px; text-align: center;">
+    <img src="logo.png" alt="Logo" style="width: 120px;">
+    <h1 style="font-size: 24px;">Diffusion en Direct</h1>
   </header>
 
-  <div id="contenu" class="hidden">
-    <video id="mainWebcam" class="main-video" autoplay muted playsinline></video>
+  <!-- Section principale de la webcam -->
+  <main style="padding: 20px; text-align: center;">
 
-    <div class="controls">
-      <button onclick="startWebcam()">Démarrer Webcam</button>
-      <button onclick="stopWebcam()">Arrêter Webcam</button>
-      <button onclick="partagerDocument()">Afficher un Document</button>
-      <input type="file" id="documentUploader" accept="application/pdf,.doc,.docx,.ppt,.pptx" style="display:none" onchange="previewDocument(event)">
+    <h2>Webcam de Diffusion</h2>
+    <p>Cliquer sur "Lancer Cam" pour démarrer la diffusion vidéo en direct via votre webcam.</p>
+
+    <!-- Zone de la webcam -->
+    <div id="videoContainer" style="margin: 20px auto; max-width: 600px; border: 2px solid #003366; padding: 10px; background-color: #fff;">
+      <video id="webcamVideo" width="100%" height="auto" autoplay></video>
     </div>
 
-    <div class="miniatures" id="miniaturesContainer">
-      <div class="miniature"></div>
-      <div class="miniature"></div>
-      <div class="miniature"></div>
-    </div>
+    <!-- Bouton pour lancer la caméra -->
+    <a href="/professeurs/webcam/relai_diffusion.php?code=<?= urlencode($code) ?>" class="btn" style="background: linear-gradient(to right, #1a1a1a, #003366); color: white; padding: 10px 20px; margin-top: 20px; border-radius: 5px; text-decoration: none;">
+      <i class="fas fa-camera"></i> Lancer Cam
+    </a>
 
-    <div class="document-section">
-      <h3>Document en cours de diffusion</h3>
-      <iframe id="documentViewer" class="document-viewer" style="display:none;"></iframe>
-    </div>
+    <!-- Section pour vidéo en direct (YouTube) -->
+    <h2 style="margin-top: 40px;">Lancer Vidéo Live</h2>
+    <p>Cliquer sur "Lancer Vidéo Live" pour démarrer la diffusion vidéo en direct sur YouTube.</p>
+    <a href="/professeurs/youtube/live.php?code=<?= urlencode($code) ?>" class="btn" style="background: linear-gradient(to right, #1a1a1a, #003366); color: white; padding: 10px 20px; margin-top: 20px; border-radius: 5px; text-decoration: none;">
+      <i class="fas fa-video"></i> Lancer Vidéo Live
+    </a>
+  </main>
 
-    <button class="btn btn-danger" id="endStreamBtn">🛑 Terminer la diffusion</button>
-  </div>
+  <!-- Footer avec liens -->
+  <footer style="background-color: #1a1a1a; color: white; text-align: center; padding: 10px;">
+    <p>&copy; 2025 Ma Période - Tous droits réservés</p>
+  </footer>
 
-  <div id="erreur" style="margin-top: 2rem;"></div>
-
+  <!-- Script pour accéder à la webcam -->
   <script>
-    const videoElement = document.getElementById('mainWebcam');
-    let webcamStream;
-
+    // Fonction pour démarrer la webcam
     function startWebcam() {
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(stream => {
-          webcamStream = stream;
-          videoElement.srcObject = stream;
-        })
-        .catch(err => alert("Erreur d'accès à la webcam : " + err.message));
-    }
+      const video = document.getElementById("webcamVideo");
 
-    function stopWebcam() {
-      if (webcamStream) {
-        webcamStream.getTracks().forEach(track => track.stop());
-        videoElement.srcObject = null;
+      // Vérifie si le navigateur supporte la webcam
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(function (stream) {
+            video.srcObject = stream;
+          })
+          .catch(function (error) {
+            console.error("Erreur d'accès à la webcam : ", error);
+          });
+      } else {
+        alert("Votre navigateur ne prend pas en charge la webcam.");
       }
     }
 
-    function partagerDocument() {
-      document.getElementById('documentUploader').click();
-    }
-
-    function previewDocument(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const fileURL = URL.createObjectURL(file);
-        const viewer = document.getElementById('documentViewer');
-        viewer.src = fileURL;
-        viewer.style.display = 'block';
-      }
-    }
-
-    document.getElementById('endStreamBtn').addEventListener('click', () => {
-      if (confirm("Voulez-vous vraiment terminer la diffusion ?")) {
-        window.location.href = "terminer_diffusion.html"; // version Netlify
-      }
-    });
-
-    // Récupération du code depuis l'URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-
-    if (code) {
-      fetch(`https://tonsite.infinityfreeapp.com/api/verifier_diffusion.php?code=${code}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            document.getElementById("contenu").classList.remove("hidden");
-            // Tu peux aussi utiliser data.lien_video si besoin
-          } else {
-            document.getElementById("erreur").innerText = data.message;
-          }
-        })
-        .catch(() => {
-          document.getElementById("erreur").innerText = "Erreur de connexion au serveur.";
-        });
-    } else {
-      document.getElementById("erreur").innerText = "Aucun code de diffusion fourni.";
-    }
+    // Démarre la webcam dès le chargement de la page
+    window.onload = startWebcam;
   </script>
+
 </body>
+
 </html>
